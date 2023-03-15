@@ -1156,11 +1156,11 @@ namespace yojimbo
 
         bool hasMessages = Stream::IsWriting && numMessages != 0;
 
-        serialize_bool( stream, hasMessages );
+        yojimbo_serialize_bool( stream, hasMessages );
 
         if ( hasMessages )
         {
-            serialize_int( stream, numMessages, 1, maxMessagesPerPacket );
+            yojimbo_serialize_int( stream, numMessages, 1, maxMessagesPerPacket );
 
             int * messageTypes = (int*) alloca( sizeof( int ) * numMessages );
 
@@ -1192,16 +1192,16 @@ namespace yojimbo
                 }
             }
 
-            serialize_bits( stream, messageIds[0], 16 );
+            yojimbo_serialize_bits( stream, messageIds[0], 16 );
 
             for ( int i = 1; i < numMessages; ++i )
-                serialize_sequence_relative( stream, messageIds[i-1], messageIds[i] );
+                yojimbo_serialize_sequence_relative( stream, messageIds[i-1], messageIds[i] );
 
             for ( int i = 0; i < numMessages; ++i )
             {
                 if ( maxMessageType > 0 )
                 {
-                    serialize_int( stream, messageTypes[i], 0, maxMessageType );
+                    yojimbo_serialize_int( stream, messageTypes[i], 0, maxMessageType );
                 }
                 else
                 {
@@ -1238,7 +1238,7 @@ namespace yojimbo
     {
         int blockSize = Stream::IsWriting ? blockMessage->GetBlockSize() : 0;
 
-        serialize_int( stream, blockSize, 1, maxBlockSize );
+        yojimbo_serialize_int( stream, blockSize, 1, maxBlockSize );
 
         uint8_t * blockData;
 
@@ -1258,7 +1258,7 @@ namespace yojimbo
             blockData = blockMessage->GetBlockData();
         } 
 
-        serialize_bytes( stream, blockData, blockSize );
+        yojimbo_serialize_bytes( stream, blockData, blockSize );
 
         return true;
     }
@@ -1274,11 +1274,11 @@ namespace yojimbo
 
         bool hasMessages = Stream::IsWriting && numMessages != 0;
 
-        serialize_bool( stream, hasMessages );
+        yojimbo_serialize_bool( stream, hasMessages );
 
         if ( hasMessages )
         {
-            serialize_int( stream, numMessages, 1, maxMessagesPerPacket );
+            yojimbo_serialize_int( stream, numMessages, 1, maxMessagesPerPacket );
 
             int * messageTypes = (int*) alloca( sizeof( int ) * numMessages );
 
@@ -1308,7 +1308,7 @@ namespace yojimbo
             {
                 if ( maxMessageType > 0 )
                 {
-                    serialize_int( stream, messageTypes[i], 0, maxMessageType );
+                    yojimbo_serialize_int( stream, messageTypes[i], 0, maxMessageType );
                 }
                 else
                 {
@@ -1362,11 +1362,11 @@ namespace yojimbo
             block.fragmentData = NULL;
         }
 
-        serialize_bits( stream, block.messageId, 16 );
+        yojimbo_serialize_bits( stream, block.messageId, 16 );
 
         if ( channelConfig.GetMaxFragmentsPerBlock() > 1 )
         {
-            serialize_int( stream, block.numFragments, 1, channelConfig.GetMaxFragmentsPerBlock() );
+            yojimbo_serialize_int( stream, block.numFragments, 1, channelConfig.GetMaxFragmentsPerBlock() );
         }
         else
         {
@@ -1376,7 +1376,7 @@ namespace yojimbo
 
         if ( block.numFragments > 1 )
         {
-            serialize_int( stream, block.fragmentId, 0, block.numFragments - 1 );
+            yojimbo_serialize_int( stream, block.fragmentId, 0, block.numFragments - 1 );
         }
         else
         {
@@ -1384,7 +1384,7 @@ namespace yojimbo
                 block.fragmentId = 0;
         }
 
-        serialize_int( stream, block.fragmentSize, 1, channelConfig.blockFragmentSize );
+        yojimbo_serialize_int( stream, block.fragmentSize, 1, channelConfig.blockFragmentSize );
 
         if ( Stream::IsReading )
         {
@@ -1397,7 +1397,7 @@ namespace yojimbo
             }
         }
 
-        serialize_bytes( stream, block.fragmentData, block.fragmentSize );
+        yojimbo_serialize_bytes( stream, block.fragmentData, block.fragmentSize );
 
         if ( block.fragmentId == 0 )
         {
@@ -1405,7 +1405,7 @@ namespace yojimbo
 
             if ( maxMessageType > 0 )
             {
-                serialize_int( stream, block.messageType, 0, maxMessageType );
+                yojimbo_serialize_int( stream, block.messageType, 0, maxMessageType );
             }
             else
             {
@@ -1455,13 +1455,13 @@ namespace yojimbo
 #endif // #if YOJIMBO_DEBUG_MESSAGE_BUDGET
 
         if ( numChannels > 1 )
-            serialize_int( stream, channelIndex, 0, numChannels - 1 );
+            yojimbo_serialize_int( stream, channelIndex, 0, numChannels - 1 );
         else
             channelIndex = 0;
 
         const ChannelConfig & channelConfig = channelConfigs[channelIndex];
 
-        serialize_bool( stream, blockMessage );
+        yojimbo_serialize_bool( stream, blockMessage );
 
         if ( !blockMessage )
         {
@@ -2571,7 +2571,7 @@ namespace yojimbo
         template <typename Stream> bool Serialize( Stream & stream, MessageFactory & messageFactory, const ConnectionConfig & connectionConfig )
         {
             const int numChannels = connectionConfig.numChannels;
-            serialize_int( stream, numChannelEntries, 0, connectionConfig.numChannels );
+            yojimbo_serialize_int( stream, numChannelEntries, 0, connectionConfig.numChannels );
 #if YOJIMBO_DEBUG_MESSAGE_BUDGET
             yojimbo_assert( stream.GetBitsProcessed() <= ConservativePacketHeaderBits );
 #endif // #if YOJIMBO_DEBUG_MESSAGE_BUDGET

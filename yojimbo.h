@@ -2089,7 +2089,7 @@ namespace yojimbo
         This class is a wrapper around the bit writer class. Its purpose is to provide unified interface for reading and writing.
         You can determine if you are writing to a stream by calling Stream::IsWriting inside your templated serialize method.
         This is evaluated at compile time, letting the compiler generate optimized serialize functions without the hassle of maintaining separate read and write functions.
-        IMPORTANT: Generally, you don't call methods on this class directly. Use the serialize_* macros instead. See test/shared.h for some examples.
+        IMPORTANT: Generally, you don't call methods on this class directly. Use the yojimbo_serialize_* macros instead. See test/shared.h for some examples.
         @see BitWriter
      */
 
@@ -2281,7 +2281,7 @@ namespace yojimbo
         This class is a wrapper around the bit reader class. Its purpose is to provide unified interface for reading and writing.
         You can determine if you are reading from a stream by calling Stream::IsReading inside your templated serialize method.
         This is evaluated at compile time, letting the compiler generate optimized serialize functions without the hassle of maintaining separate read and write functions.
-        IMPORTANT: Generally, you don't call methods on this class directly. Use the serialize_* macros instead. See test/shared.h for some examples.
+        IMPORTANT: Generally, you don't call methods on this class directly. Use the yojimbo_serialize_* macros instead. See test/shared.h for some examples.
         @see BitReader
      */
 
@@ -2873,7 +2873,7 @@ namespace yojimbo
         @param max The maximum value.
      */
 
-    #define serialize_int( stream, value, min, max )                    \
+    #define yojimbo_serialize_int( stream, value, min, max )                    \
         do                                                              \
         {                                                               \
             yojimbo_assert( min < max );                                \
@@ -2909,7 +2909,7 @@ namespace yojimbo
         @param value The integer value to serialize.
     */
 
-    #define serialize_varint32( stream, value )                         \
+    #define yojimbo_serialize_varint32( stream, value )                         \
         do                                                              \
         {                                                               \
             uint32_t int32_value = 0;                                   \
@@ -2936,7 +2936,7 @@ namespace yojimbo
         @param value The 64 bit integer value to serialize.
     */
 
-    #define serialize_varint64( stream, value )                         \
+    #define yojimbo_serialize_varint64( stream, value )                         \
         do                                                              \
         {                                                               \
             uint64_t int64_value = 0;                                   \
@@ -2964,7 +2964,7 @@ namespace yojimbo
         @param bits The number of bits to serialize in [1,32].
      */
 
-    #define serialize_bits( stream, value, bits )                       \
+    #define yojimbo_serialize_bits( stream, value, bits )                       \
         do                                                              \
         {                                                               \
             yojimbo_assert( bits > 0 );                                 \
@@ -2993,7 +2993,7 @@ namespace yojimbo
         @param value The boolean value to serialize.
      */
 
-    #define serialize_bool( stream, value )                             \
+    #define yojimbo_serialize_bool( stream, value )                             \
         do                                                              \
         {                                                               \
             uint32_t uint32_bool_value = 0;                             \
@@ -3001,7 +3001,7 @@ namespace yojimbo
             {                                                           \
                 uint32_bool_value = value ? 1 : 0;                      \
             }                                                           \
-            serialize_bits( stream, uint32_bool_value, 1 );             \
+            yojimbo_serialize_bits( stream, uint32_bool_value, 1 );             \
             if ( Stream::IsReading )                                    \
             {                                                           \
                 value = uint32_bool_value ? true : false;               \
@@ -3032,7 +3032,7 @@ namespace yojimbo
         @param value The float value to serialize.
      */
 
-    #define serialize_float( stream, value )                                        \
+    #define yojimbo_serialize_float( stream, value )                                        \
         do                                                                          \
         {                                                                           \
             if ( !yojimbo::serialize_float_internal( stream, value ) )              \
@@ -3050,7 +3050,7 @@ namespace yojimbo
         @param value The unsigned 32 bit integer value to serialize.
      */
 
-    #define serialize_uint32( stream, value ) serialize_bits( stream, value, 32 );
+    #define yojimbo_serialize_uint32( stream, value ) yojimbo_serialize_bits( stream, value, 32 );
 
     template <typename Stream> bool serialize_uint64_internal( Stream & stream, uint64_t & value )
     {
@@ -3060,8 +3060,8 @@ namespace yojimbo
             lo = value & 0xFFFFFFFF;
             hi = value >> 32;
         }
-        serialize_bits( stream, lo, 32 );
-        serialize_bits( stream, hi, 32 );
+        yojimbo_serialize_bits( stream, lo, 32 );
+        yojimbo_serialize_bits( stream, hi, 32 );
         if ( Stream::IsReading )
         {
             value = ( uint64_t(hi) << 32 ) | lo;
@@ -3078,7 +3078,7 @@ namespace yojimbo
         @param value The unsigned 64 bit integer value to serialize.
      */
 
-    #define serialize_uint64( stream, value )                                       \
+    #define yojimbo_serialize_uint64( stream, value )                                       \
         do                                                                          \
         {                                                                           \
             if ( !yojimbo::serialize_uint64_internal( stream, value ) )             \
@@ -3097,7 +3097,7 @@ namespace yojimbo
         {
             tmp.double_value = value;
         }
-        serialize_uint64( stream, tmp.int_value );
+        yojimbo_serialize_uint64( stream, tmp.int_value );
         if ( Stream::IsReading )
         {
             value = tmp.double_value;
@@ -3114,7 +3114,7 @@ namespace yojimbo
         @param value The double precision floating point value to serialize.
      */
 
-    #define serialize_double( stream, value )                                       \
+    #define yojimbo_serialize_double( stream, value )                                       \
         do                                                                          \
         {                                                                           \
             if ( !yojimbo::serialize_double_internal( stream, value ) )             \
@@ -3138,7 +3138,7 @@ namespace yojimbo
         @param bytes The number of bytes to serialize.
      */
 
-    #define serialize_bytes( stream, data, bytes )                                  \
+    #define yojimbo_serialize_bytes( stream, data, bytes )                                  \
         do                                                                          \
         {                                                                           \
             if ( !yojimbo::serialize_bytes_internal( stream, data, bytes ) )        \
@@ -3155,8 +3155,8 @@ namespace yojimbo
             length = (int) strlen( string );
             yojimbo_assert( length < buffer_size );
         }
-        serialize_int( stream, length, 0, buffer_size - 1 );
-        serialize_bytes( stream, (uint8_t*)string, length );
+        yojimbo_serialize_int( stream, length, 0, buffer_size - 1 );
+        yojimbo_serialize_bytes( stream, (uint8_t*)string, length );
         if ( Stream::IsReading )
         {
             string[length] = '\0';
@@ -3174,7 +3174,7 @@ namespace yojimbo
         @param buffer_size The size of the string buffer. String with terminating null character must fit into this buffer.
      */
 
-    #define serialize_string( stream, string, buffer_size )                                 \
+    #define yojimbo_serialize_string( stream, string, buffer_size )                                 \
         do                                                                                  \
         {                                                                                   \
             if ( !yojimbo::serialize_string_internal( stream, string, buffer_size ) )       \
@@ -3191,7 +3191,7 @@ namespace yojimbo
         @param stream The stream object. May be a read, write or measure stream.
      */
 
-    #define serialize_align( stream )                                                       \
+    #define yojimbo_serialize_align( stream )                                                       \
         do                                                                                  \
         {                                                                                   \
             if ( !stream.SerializeAlign() )                                                 \
@@ -3208,7 +3208,7 @@ namespace yojimbo
         @param stream The stream object. May be a read, write or measure stream.
      */
 
-    #define serialize_check( stream )                                                       \
+    #define yojimbo_serialize_check( stream )                                                       \
         do                                                                                  \
         {                                                                                   \
             if ( !stream.SerializeCheck() )                                                 \
@@ -3226,7 +3226,7 @@ namespace yojimbo
         @param object The object to serialize. Must have a serialize method on it.
      */
 
-    #define serialize_object( stream, object )                                              \
+    #define yojimbo_serialize_object( stream, object )                                              \
         do                                                                                  \
         {                                                                                   \
             if ( !object.Serialize( stream ) )                                              \
@@ -3244,7 +3244,7 @@ namespace yojimbo
             yojimbo_assert( address.IsValid() );
             address.ToString( buffer, sizeof( buffer ) );
         }
-        serialize_string( stream, buffer, sizeof( buffer ) );
+        yojimbo_serialize_string( stream, buffer, sizeof( buffer ) );
         if ( Stream::IsReading )
         {
             address = Address( buffer );
@@ -3265,7 +3265,7 @@ namespace yojimbo
         @param value The address to serialize. Must be a valid address.
      */
 
-    #define serialize_address( stream, value )                                              \
+    #define yojimbo_serialize_address( stream, value )                                              \
         do                                                                                  \
         {                                                                                   \
             if ( !yojimbo::serialize_address_internal( stream, value ) )                    \
@@ -3288,7 +3288,7 @@ namespace yojimbo
         {
             oneBit = difference == 1;
         }
-        serialize_bool( stream, oneBit );
+        yojimbo_serialize_bool( stream, oneBit );
         if ( oneBit )
         {
             if ( Stream::IsReading )
@@ -3303,10 +3303,10 @@ namespace yojimbo
         {
             twoBits = difference <= 6;
         }
-        serialize_bool( stream, twoBits );
+        yojimbo_serialize_bool( stream, twoBits );
         if ( twoBits )
         {
-            serialize_int( stream, difference, 2, 6 );
+            yojimbo_serialize_int( stream, difference, 2, 6 );
             if ( Stream::IsReading )
             {
                 current = previous + difference;
@@ -3319,10 +3319,10 @@ namespace yojimbo
         {
             fourBits = difference <= 23;
         }
-        serialize_bool( stream, fourBits );
+        yojimbo_serialize_bool( stream, fourBits );
         if ( fourBits )
         {
-            serialize_int( stream, difference, 7, 23 );
+            yojimbo_serialize_int( stream, difference, 7, 23 );
             if ( Stream::IsReading )
             {
                 current = previous + difference;
@@ -3335,10 +3335,10 @@ namespace yojimbo
         {
             eightBits = difference <= 280;
         }
-        serialize_bool( stream, eightBits );
+        yojimbo_serialize_bool( stream, eightBits );
         if ( eightBits )
         {
-            serialize_int( stream, difference, 24, 280 );
+            yojimbo_serialize_int( stream, difference, 24, 280 );
             if ( Stream::IsReading )
             {
                 current = previous + difference;
@@ -3351,10 +3351,10 @@ namespace yojimbo
         {
             twelveBits = difference <= 4377;
         }
-        serialize_bool( stream, twelveBits );
+        yojimbo_serialize_bool( stream, twelveBits );
         if ( twelveBits )
         {
-            serialize_int( stream, difference, 281, 4377 );
+            yojimbo_serialize_int( stream, difference, 281, 4377 );
             if ( Stream::IsReading )
             {
                 current = previous + difference;
@@ -3367,10 +3367,10 @@ namespace yojimbo
         {
             sixteenBits = difference <= 69914;
         }
-        serialize_bool( stream, sixteenBits );
+        yojimbo_serialize_bool( stream, sixteenBits );
         if ( sixteenBits )
         {
-            serialize_int( stream, difference, 4378, 69914 );
+            yojimbo_serialize_int( stream, difference, 4378, 69914 );
             if ( Stream::IsReading )
             {
                 current = previous + difference;
@@ -3379,7 +3379,7 @@ namespace yojimbo
         }
 
         uint32_t value = current;
-        serialize_uint32( stream, value );
+        yojimbo_serialize_uint32( stream, value );
         if ( Stream::IsReading )
         {
             current = value;
@@ -3398,7 +3398,7 @@ namespace yojimbo
         @param current The current integer value.
      */
 
-    #define serialize_int_relative( stream, previous, current )                             \
+    #define yojimbo_serialize_int_relative( stream, previous, current )                             \
         do                                                                                  \
         {                                                                                   \
             if ( !yojimbo::serialize_int_relative_internal( stream, previous, current ) )   \
@@ -3425,10 +3425,10 @@ namespace yojimbo
             yojimbo_assert( uint16_t( sequence - ack_delta ) == ack );
             ack_in_range = ack_delta <= 64;
         }
-        serialize_bool( stream, ack_in_range );
+        yojimbo_serialize_bool( stream, ack_in_range );
         if ( ack_in_range )
         {
-            serialize_int( stream, ack_delta, 1, 64 );
+            yojimbo_serialize_int( stream, ack_delta, 1, 64 );
             if ( Stream::IsReading )
             {
                 ack = sequence - ack_delta;
@@ -3436,7 +3436,7 @@ namespace yojimbo
         }
         else
         {
-            serialize_bits( stream, ack, 16 );
+            yojimbo_serialize_bits( stream, ack, 16 );
         }
         return true;
     }
@@ -3451,7 +3451,7 @@ namespace yojimbo
         @param ack The ack sequence number, which is typically near the current sequence number.
      */
 
-    #define serialize_ack_relative( stream, sequence, ack  )                                        \
+    #define yojimbo_serialize_ack_relative( stream, sequence, ack  )                                        \
         do                                                                                          \
         {                                                                                           \
             if ( !yojimbo::serialize_ack_relative_internal( stream, sequence, ack ) )               \
@@ -3466,13 +3466,13 @@ namespace yojimbo
         {
             uint32_t a = sequence1;
             uint32_t b = sequence2 + ( ( sequence1 > sequence2 ) ? 65536 : 0 );
-            serialize_int_relative( stream, a, b );
+            yojimbo_serialize_int_relative( stream, a, b );
         }
         else
         {
             uint32_t a = sequence1;
             uint32_t b = 0;
-            serialize_int_relative( stream, a, b );
+            yojimbo_serialize_int_relative( stream, a, b );
             if ( b >= 65536 )
             {
                 b -= 65536;
@@ -3493,7 +3493,7 @@ namespace yojimbo
         @param sequence2 The second sequence number to be encoded relative to the first.
      */
 
-    #define serialize_sequence_relative( stream, sequence1, sequence2 )                             \
+    #define yojimbo_serialize_sequence_relative( stream, sequence1, sequence2 )                             \
         do                                                                                          \
         {                                                                                           \
             if ( !yojimbo::serialize_sequence_relative_internal( stream, sequence1, sequence2 ) )   \
@@ -3502,9 +3502,9 @@ namespace yojimbo
             }                                                                                       \
         } while (0)
 
-    // read macros corresponding to each serialize_*. useful when you want separate read and write functions.
+    // read macros corresponding to each yojimbo_serialize_*. useful when you want separate read and write functions.
 
-    #define read_bits( stream, value, bits )                                                \
+    #define yojimbo_read_bits( stream, value, bits )                                                \
     do                                                                                      \
     {                                                                                       \
         yojimbo_assert( bits > 0 );                                                         \
@@ -3517,7 +3517,7 @@ namespace yojimbo
         value = uint32_value;                                                               \
     } while (0)
 
-    #define read_int( stream, value, min, max )                                             \
+    #define yojimbo_read_int( stream, value, min, max )                                             \
         do                                                                                  \
         {                                                                                   \
             yojimbo_assert( min < max );                                                    \
@@ -3533,25 +3533,25 @@ namespace yojimbo
             }                                                                               \
         } while (0)
 
-    #define read_bool( stream, value ) read_bits( stream, value, 1 )
+    #define yojimbo_read_bool( stream, value ) yojimbo_read_bits( stream, value, 1 )
 
-    #define read_float                  serialize_float
-    #define read_uint32                 serialize_uint32
-    #define read_uint64                 serialize_uint64
-    #define read_double                 serialize_double
-    #define read_bytes                  serialize_bytes
-    #define read_string                 serialize_string
-    #define read_align                  serialize_align
-    #define read_check                  serialize_check
-    #define read_object                 serialize_object
-    #define read_address                serialize_address
-    #define read_int_relative           serialize_int_relative
-    #define read_ack_relative           serialize_ack_relative
-    #define read_sequence_relative      serialize_sequence_relative
+    #define yojimbo_read_float                  yojimbo_serialize_float
+    #define yojimbo_read_uint32                 yojimbo_serialize_uint32
+    #define yojimbo_read_uint64                 yojimbo_serialize_uint64
+    #define yojimbo_read_double                 yojimbo_serialize_double
+    #define yojimbo_read_bytes                  yojimbo_serialize_bytes
+    #define yojimbo_read_string                 yojimbo_serialize_string
+    #define yojimbo_read_align                  yojimbo_serialize_align
+    #define yojimbo_read_check                  yojimbo_serialize_check
+    #define yojimbo_read_object                 yojimbo_serialize_object
+    #define yojimbo_read_address                yojimbo_serialize_address
+    #define yojimbo_read_int_relative           yojimbo_serialize_int_relative
+    #define yojimbo_read_ack_relative           yojimbo_serialize_ack_relative
+    #define yojimbo_read_sequence_relative      yojimbo_serialize_sequence_relative
 
-    // write macros corresponding to each serialize_*. useful when you want separate read and write functions for some reason.
+    // write macros corresponding to each yojimbo_serialize_*. useful when you want separate read and write functions for some reason.
 
-    #define write_bits( stream, value, bits )                                               \
+    #define yojimbo_write_bits( stream, value, bits )                                               \
         do                                                                                  \
         {                                                                                   \
             yojimbo_assert( bits > 0 );                                                     \
@@ -3563,7 +3563,7 @@ namespace yojimbo
             }                                                                               \
         } while (0)
 
-    #define write_int( stream, value, min, max )                                            \
+    #define yojimbo_write_int( stream, value, min, max )                                            \
         do                                                                                  \
         {                                                                                   \
             yojimbo_assert( min < max );                                                    \
@@ -3574,19 +3574,19 @@ namespace yojimbo
                 return false;                                                               \
         } while (0)
 
-    #define write_float                 serialize_float
-    #define write_uint32                serialize_uint32
-    #define write_uint64                serialize_uint64
-    #define write_double                serialize_double
-    #define write_bytes                 serialize_bytes
-    #define write_string                serialize_string
-    #define write_align                 serialize_align
-    #define write_check                 serialize_check
-    #define write_object                serialize_object
-    #define write_address               serialize_address
-    #define write_int_relative          serialize_int_relative
-    #define write_ack_relative          serialize_ack_relative
-    #define write_sequence_relative     serialize_sequence_relative
+    #define yojimbo_write_float                 yojimbo_serialize_float
+    #define yojimbo_write_uint32                yojimbo_serialize_uint32
+    #define yojimbo_write_uint64                yojimbo_serialize_uint64
+    #define yojimbo_write_double                yojimbo_serialize_double
+    #define yojimbo_write_bytes                 yojimbo_serialize_bytes
+    #define yojimbo_write_string                yojimbo_serialize_string
+    #define yojimbo_write_align                 yojimbo_serialize_align
+    #define yojimbo_write_check                 yojimbo_serialize_check
+    #define yojimbo_write_object                yojimbo_serialize_object
+    #define yojimbo_write_address               yojimbo_serialize_address
+    #define yojimbo_write_int_relative          yojimbo_serialize_int_relative
+    #define yojimbo_write_ack_relative          yojimbo_serialize_ack_relative
+    #define yojimbo_write_sequence_relative     yojimbo_serialize_sequence_relative
 
     /**
         Interface for an object that knows how to read, write and measure how many bits it would take up in a bit stream.
@@ -4424,7 +4424,7 @@ namespace yojimbo
         This channel type is best used for control messages and RPCs.
         Messages sent over this channel are included in connection packets until one of those packets is acked. Messages are acked individually and remain in the send queue until acked.
         Blocks attached to messages sent over this channel are split up into fragments. Each fragment of the block is included in a connection packet until one of those packets are acked. Eventually, all fragments are received on the other side, and block is reassembled and attached to the message.
-        Only one message block may be in flight over the network at any time, so blocks stall out message delivery slightly. Therefore, only use blocks for large data that won't fit inside a single connection packet where you actually need the channel to split it up into fragments. If your block fits inside a packet, just serialize it inside your message serialize via serialize_bytes instead.
+        Only one message block may be in flight over the network at any time, so blocks stall out message delivery slightly. Therefore, only use blocks for large data that won't fit inside a single connection packet where you actually need the channel to split it up into fragments. If your block fits inside a packet, just serialize it inside your message serialize via yojimbo_serialize_bytes instead.
      */
 
     class ReliableOrderedChannel : public Channel
