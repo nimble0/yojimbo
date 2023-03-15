@@ -22,8 +22,11 @@ project(Yojimbo C CXX)
 ## Yojimbo Static Library
 ############################################################
 ##
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
   add_library(yojimbo STATIC
       ${SOURCE_PATH}/yojimbo.cpp
+      ${SOURCE_PATH}/certs.c
       ${SOURCE_PATH}/tlsf/tlsf.c
       ${SOURCE_PATH}/netcode.io/netcode.c
       ${SOURCE_PATH}/reliable.io/reliable.c  )
@@ -47,6 +50,7 @@ project(Yojimbo C CXX)
     ## library
     add_library(yojimbo_test STATIC
       ${SOURCE_PATH}/yojimbo.cpp
+      ${SOURCE_PATH}/certs.c
       ${SOURCE_PATH}/tlsf/tlsf.c
       ${SOURCE_PATH}/netcode.io/netcode.c
       ${SOURCE_PATH}/reliable.io/reliable.c
